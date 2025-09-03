@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Force HTTPS (This should ideally be the first rule)
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Redirect everything not /public to /public
+    RewriteCond %{REQUEST_URI} !^/public/ [NC]
+    RewriteCond %{REQUEST_URI} !^/public/index.php [NC]
+    RewriteRule ^(.*)$ public/$1 [L,QSA]
+</IfModule>

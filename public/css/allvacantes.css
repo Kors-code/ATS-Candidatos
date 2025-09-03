@@ -1,0 +1,242 @@
+/* public/css/vacantes.css */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+  background: #f5f1f3;
+  color: #333;
+}
+.site-header {
+  background: #840028;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  animation: fadeInDown 0.8s ease;
+}
+.site-header .logo {
+  height: 50px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.site-header h1 {
+  display: inline-block;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+}
+
+/* ---------- Tarjeta: comportamiento de expansión (reemplaza reglas anteriores) ---------- */
+.vacante-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;               /* corta contenido fuera del card (controlado por max-height) */
+  transition: box-shadow 280ms ease, max-height 420ms cubic-bezier(.2,.9,.2,1);
+  max-height: 240px;              /* altura inicial (ajusta si quieres más/menos) */
+  position: relative;
+}
+
+/* focus visible accesible */
+.vacante-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(132,0,40,0.12), 0 18px 36px rgba(0,0,0,0.12);
+}
+
+/* Cuando hover o focus-within: expandir la tarjeta (esto hace que el grid se reordene) */
+.vacante-card:hover,
+.vacante-card:focus-within {
+  max-height: 880px;              /* altura máxima al expandirse (ajústala si quieres) */
+  z-index: 8;
+  box-shadow: 0 22px 50px rgba(8,8,8,0.16);
+}
+
+/* --- Texto: vista previa y contenido completo --- */
+/* Preview - visible siempre (limita líneas) */
+.descripcion {
+  padding: 16px;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: #444;
+  max-height: 4.6em;   /* aprox 2-3 líneas */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  hyphens: auto;
+  transition: opacity 220ms ease, max-height 300ms ease;
+}
+
+/* Contenido completo oculto por defecto (no ocupa espacio) */
+.descripcion-full {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 420ms cubic-bezier(.2,.9,.2,1), opacity 260ms ease;
+  padding: 0 16px;   /* padding aparece cuando se muestra */
+  color: #333;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* Mostrar descripción completa cuando la tarjeta se expande */
+.vacante-card:hover .descripcion,
+.vacante-card:focus-within .descripcion {
+  opacity: 0;
+  max-height: 0;
+  padding: 0 16px;
+}
+
+.vacante-card:hover .descripcion-full,
+.vacante-card:focus-within .descripcion-full {
+  max-height: 640px;   /* espacio máximo para contenido; si excede, aparecerá scroll interno */
+  opacity: 1;
+  padding-top: 10px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Si la descripcion-full tiene mucho contenido, añade pequeña pista visual (degradado) */
+.vacante-card .descripcion-full::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 56px;   /* ajusta según la posición del botón .btn-vermas */
+  height: 34px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(245,241,243,1) 100%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.vacante-card:hover .descripcion-full::after,
+.vacante-card:focus-within .descripcion-full::after {
+  opacity: 1;
+}
+
+/* Requisitos: estilo en lista para mejor lectura */
+.requisitos-list {
+  list-style: disc;
+  padding-left: 18px;
+  margin-top: 8px;
+}
+.requisitos-list li {
+  margin-bottom: 6px;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.btn-vermas {
+  display: block;
+  text-align: center;
+  margin: 0 16px 16px;
+  padding: 12px;
+  background: #840028;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  text-transform: uppercase;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+.btn-vermas:hover {
+  background: #a10b3e;
+}
+
+/* Mensaje sin vacantes */
+.sin-vacantes {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 1.1rem;
+  color: #777;
+  padding: 50px 0;
+}
+
+/* Pie de página */
+.site-footer {
+  background: #222;
+  color: #ccc;
+  text-align: center;
+  padding: 16px;
+  font-size: 0.9rem;
+}
+
+/* Animaciones */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsividad extra */
+@media (max-width: 600px) {
+  .site-header h1 { font-size: 1.5rem; }
+  .vacantes-container { padding: 20px; gap: 16px; }
+}
+.vacantes-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.vacante-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.vacante-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+}
+
+/* Título */
+.vacante-card h2 {
+  font-size: 1.3rem;
+  color: #222;
+  font-weight: 700;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+
+/* Descripción */
+.vacante-card .descripcion {
+  flex-grow: 1;
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* Botón */
+.btn-vermas {
+  display: inline-block;
+  padding: 12px 18px;
+  background: #840028;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 700;
+  text-align: center;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-vermas:hover {
+  background: #a10b3e;
+  transform: scale(1.04);
+}
+
