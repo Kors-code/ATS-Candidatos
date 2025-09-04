@@ -18,14 +18,15 @@ class TwoFactorEmailController extends Controller
     // Generar y enviar OTP
     public function setup(Request $request)
     {
-        $user = Auth::user();
-
+        $userId = $request->session()->get('2fa:user:id');
+        $user = \App\Models\User::findOrFail($userId);
         // Generar código de 6 dígitos
         $code = rand(100000, 999999);
 
         // Guardar en BD con expiración
         $user->email2fa_secret = $code;
         $user->email2fa_expires_at = now()->addMinutes(5);
+        $user->fav_2fa = "email";
         $user->save();
 
         // Enviar correo
@@ -64,8 +65,8 @@ class TwoFactorEmailController extends Controller
         $request->validate([
             'code' => 'required|digits:6',
         ]);
-
-        $user = Auth::user();
+        $userId = $request->session()->get('2fa:user:id');
+        $user = \App\Models\User::findOrFail($userId);
 
         if (
             $user->email2fa_secret === $request->code &&
@@ -75,8 +76,10 @@ class TwoFactorEmailController extends Controller
             // OTP válido
             $user->email2fa_secret = null;
             $user->email2fa_expires_at = null;
+            $user->fav_2fa = "email";
             $user->save();
-
+             Auth::login($user);
+            $request->session()->forget('2fa:user:id');
             return redirect()->route('vacantes.inicio')->with('success', 'Verificación exitosa ✅');
         }
 

@@ -79,3 +79,24 @@
         padding: 15px;
       }
     }
+    .verificacion .btn {
+  display: inline-block;
+  margin: 10px;
+  padding: 12px 24px;
+  background-color: #840028;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  font-family: 'Konnect Bold', sans-serif;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.verificacion .btn:hover {
+  background-color: #a00032;
+  transform: translateY(-2px);
+}
+
+.verificacion p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}

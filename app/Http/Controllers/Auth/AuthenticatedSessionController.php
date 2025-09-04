@@ -38,12 +38,21 @@ public function store(LoginRequest $request): RedirectResponse
         $user = Auth::user();
 
         // Si el usuario tiene activo el 2FA → pedir código
-        if ($user->google2fa_secret) {
+        if ($user->fav_2fa === 'google_authenticator') {
             Auth::logout(); // cerramos hasta que valide el código
 
             $request->session()->put('2fa:user:id', $user->id);
 
             return redirect()->route('2fa.verify');
+        }
+        if ($user->fav_2fa === 'email') {
+            Auth::logout(); // cerramos hasta que valide el código
+            $request->session()->put('2fa:user:id', $user->id);
+            app(\App\Http\Controllers\TwoFactorEmailController::class)->setup($request);
+
+
+            return redirect()->route('2fa.email.setup');
+
         }
 
         return redirect()->intended(route('vacantes.inicio'));

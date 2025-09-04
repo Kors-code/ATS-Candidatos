@@ -25,7 +25,7 @@ class TwoFactorController extends Controller
         // Guardar secret en BD
         $user->google2fa_secret = $totp->getSecret();
         $user->save();
-
+        
         // Generar QR
         $uri = $totp->getProvisioningUri();
         $renderer = new ImageRenderer(
@@ -34,31 +34,32 @@ class TwoFactorController extends Controller
         );
         $writer = new Writer($renderer);
         $qrCode = base64_encode($writer->writeString($uri));
-
+        
         return view('auth.2fa-setup', compact('qrCode'));
     }
-
+    
     public function showVerifyForm()
     {
         return view('auth.2fa-verify');
     }
-
+    
     public function verify(Request $request)
     {
         $request->validate(['code' => 'required']);
-
+        
         $userId = $request->session()->get('2fa:user:id');
         $user = \App\Models\User::findOrFail($userId);
-
+        
         // ✅ Recrear TOTP desde el secret almacenado
         $totp = TOTP::createFromSecret($user->google2fa_secret);
-
+        
         if ($totp->verify($request->code)) {
+            $user->fav_2fa = "google_authenticator";
             Auth::login($user);
             $request->session()->forget('2fa:user:id');
             return redirect()->intended(route('vacantes.inicio'));
         }
-
+        
         return back()->withErrors(['code' => 'Código inválido']);
     }
 }

@@ -132,7 +132,7 @@ Route::get('/candidatos/{slug}/export', [CandidatoController::class, 'export'])-
         
         
         // Verificar correo
-        Route::post('/enviar-email/{user}', [UserController::class, 'enviarVerificacion'])->name('enviarVerificacion');
+        Route::get('/enviar-email', [UserController::class, 'enviarVerificacion'])->name('enviarVerificacion');
 
         // Enviar email de verificación
 });

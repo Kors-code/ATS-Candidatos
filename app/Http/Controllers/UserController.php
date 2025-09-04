@@ -12,6 +12,8 @@ use MailerSend\Helpers\Builder\EmailParams;
 use MailerSend\Helpers\Builder\Recipient;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
+
 
 class UserController extends Controller
 {
@@ -174,10 +176,9 @@ public function store(Request $request)
         return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente.');
     }
 
-public function enviarVerificacion($id)
+public function enviarVerificacion()
 {
-    $user = User::findOrFail($id);
-
+    $user = Auth::user();
     $mailersend = new MailerSend([
         'api_key' => 'mlsn.608054d02d63a90ad67cab94e7cdf80ca366b43675588065dfb86fae3d0a5ba0'
     ]);
@@ -229,6 +230,7 @@ public function verifyEmail($id, $token)
         $user->email_verification_token = null;
         $user->email_token_expired_at = null;
         $user->email_verified_at = now();
+        $user->fav_2fa = "email";
         $user->save();
 
         return view('usuarios.verificacion', [

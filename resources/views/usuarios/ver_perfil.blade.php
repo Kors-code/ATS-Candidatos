@@ -8,7 +8,17 @@
 </head>
 <body>
   <!-- Botón para dispositivos pequeños (menú offcanvas) -->
+  @if(session('success'))
+    <div class="alert alert-success">
+      {{ session('success') }}
+    </div>
+  @endif
 
+  @if(session('error'))
+    <div class="alert alert-danger">
+      {{ session('error') }}
+    </div>
+  @endif
 
 
   <main class="container">
@@ -26,13 +36,13 @@
       <div class="verificacion">
     <h3>Verificación de seguridad</h3>
 
-    @if(!$usuario->email_verified_at && !$usuario->google2fa_secret)
+    @if(!$usuario->fav_2fa)
         <p>No has configurado la verificación. Elige una opción:</p>
-        <a href="{{ route('2fa.email.setup') }}" class="btn">Verificar por correo</a>
-        <a href="{{ route('2fa.setup') }}" class="btn">Verificar con Google Authenticator</a>
-    @elseif($usuario->email_verified_at)
+<a href="{{ route('enviarVerificacion') }}" class="btn">📧 Verificar por correo</a>
+<a href="{{ route('2fa.setup') }}" class="btn">🔒 Verificar con Google Authenticator</a>
+    @elseif($usuario->fav_2fa === 'email')
         <p>✅ Verificación por correo completada</p>
-    @elseif($usuario->google2fa_secret)
+    @elseif($usuario->fav_2fa === 'google_authenticator')
         <p>✅ Verificación con Google Authenticator activa</p>
     @endif
 </div>
