@@ -20,7 +20,7 @@
                 <th>Descripción</th>
                 <th style="width: 110px;">Editar</th>
                 <th style="width: 120px;">Eliminar</th>
-                <th style="">Habilitar</th>
+                <th style="">Habilitar </th>
                 <th style="">Deshabilitar</th>
                 <th style="">Estado</th>
             </tr>

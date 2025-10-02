@@ -52,10 +52,14 @@ Route::post('/email2fa/setup', [TwoFactorEmailController::class, 'setup'])->name
 Route::post('/email2fa/verify', [TwoFactorEmailController::class, 'verify'])->name('email2fa.verify.post');
 
 
+Route::post('/masivo/subircv', [CandidatoController::class, 'storeMasivo'])
+    ->name('storeMasivo.subir');
 
-Route::middleware('auth')->group(function () {
-
+    Route::get('/carga-masiva', [CandidatoController::class, 'subirAllCv'])
+        ->name('subirAllCv');
     // Usuarios
+Route::middleware('auth')->group(function () {
+    
     Route::get('/view-users', [UserController::class, 'index'])
     ->middleware('can:admin')
     ->name('view-users');
@@ -135,4 +139,10 @@ Route::get('/candidatos/{slug}/export', [CandidatoController::class, 'export'])-
         Route::get('/enviar-email', [UserController::class, 'enviarVerificacion'])->name('enviarVerificacion');
 
         // Enviar email de verificación
+
+        //store masivo
+        // Mostrar formulario de carga masiva
+
+// Procesar carga masiva (recibe el slug de la vacante)
+
 });

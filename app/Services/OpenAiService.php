@@ -15,6 +15,17 @@ class OpenAIService
 
     public function analizarCV($texto, $nombreVacante , $requisito_ia ,$criterios)
     {
+         if (is_string($criterios)) {
+        $criterios = json_decode($criterios, true) ?: [];
+    }
+    if (!is_array($criterios)) {
+        $criterios = [];
+    }
+
+    $criteriosTexto = '';
+    foreach ($criterios as $criterio => $peso) {
+        $criteriosTexto .= ucfirst($criterio) . ": " . $peso . "%\n";
+    }
     $criteriosTexto = '';
     foreach ($criterios as $criterio => $peso) {
         $criteriosTexto .= ucfirst($criterio) . ": " . $peso . "%\n";

@@ -456,4 +456,130 @@ public function export(Request $request, $slug)
 
     return Excel::download(new CandidatosExport($candidatos), 'candidatos.xlsx');
 }
+public function storeMasivo(Request $request)
+{
+    // Validamos al menos la vacante (dejamos cvs opcional aquí para manejar manualmente)
+    $request->validate([
+        'vacante_id' => 'required|exists:vacantes,slug',
+        'cvs.*'      => 'file|mimes:pdf,doc,docx|max:2048',
+    ]);
+
+    // Si PHP/servidor truncó el POST (post_max_size) no habrá archivos en $request->files
+    if (!$request->hasFile('cvs')) {
+        // Log para depuración
+        \Log::warning('storeMasivo: no se detectaron archivos en la solicitud', [
+            'has_file' => $request->hasFile('cvs'),
+            'files_keys' => array_keys($request->files->all()),
+            'content_length' => $_SERVER['CONTENT_LENGTH'] ?? null,
+        ]);
+
+        return back()->withErrors(['cvs' => 'No se detectaron archivos. Verifica que hayas seleccionado archivos y que el tamaño total no exceda la configuración de PHP.']);
+    }
+
+    $files = $request->file('cvs');
+
+    // Normalizar a array siempre
+    if ($files instanceof \Illuminate\Http\UploadedFile) {
+        $files = [$files];
+    }
+
+    if (!is_array($files) || empty($files)) {
+        \Log::error('storeMasivo: $files no es array o está vacío', ['files' => $files]);
+        return back()->withErrors(['cvs' => 'Debes subir al menos un archivo válido.']);
+    }
+
+    // Buscar la vacante por slug desde el form
+    $vacante = Vacante::where('slug', $request->vacante_id)->firstOrFail();
+
+    foreach ($files as $cvFile) {
+        if (!$cvFile || !$cvFile->isValid()) {
+            \Log::warning('storeMasivo: archivo inválido encontrado', ['file' => $cvFile]);
+            continue; // saltar archivo inválido pero procesar otros
+        }
+
+        $path = $cvFile->store('privado/cvs', 'private');
+        $filePath = Storage::disk('private')->path($path);
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
+        $text = '';
+        try {
+            if ($extension === 'pdf') {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile($filePath);
+                $text = $pdf->getText();
+            } elseif (in_array($extension, ['doc', 'docx'])) {
+                $phpWord = \PhpOffice\PhpWord\IOFactory::load($filePath);
+
+                $extractText = function ($element) use (&$extractText) {
+                    $result = '';
+                    if ($element instanceof \PhpOffice\PhpWord\Element\Text) {
+                        $result .= $element->getText();
+                    } elseif ($element instanceof \PhpOffice\PhpWord\Element\TextRun) {
+                        foreach ($element->getElements() as $child) {
+                            $result .= $extractText($child);
+                        }
+                    } elseif ($element instanceof \PhpOffice\PhpWord\Element\Table) {
+                        foreach ($element->getRows() as $row) {
+                            foreach ($row->getCells() as $cell) {
+                                foreach ($cell->getElements() as $cellElement) {
+                                    $result .= $extractText($cellElement) . " ";
+                                }
+                                $result .= "\n";
+                            }
+                        }
+                    } elseif (method_exists($element, 'getElements')) {
+                        foreach ($element->getElements() as $child) {
+                            $result .= $extractText($child);
+                        }
+                    }
+                    return $result;
+                };
+
+                foreach ($phpWord->getSections() as $section) {
+                    foreach ($section->getElements() as $element) {
+                        $text .= $extractText($element) . "\n";
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error("Error al procesar archivo: " . $e->getMessage(), ['file' => $cvFile->getClientOriginalName()]);
+            $text = "[Error al procesar CV]";
+        }
+
+        // Evaluación IA
+        $openai = new \App\Services\OpenAiService();
+        $evaluacion = $openai->analizarCV(
+            $text,
+            $vacante->slug,
+            $vacante->requisito_ia,
+            $vacante->criterios
+        );
+
+        // Guardar candidato
+        Candidato::create([
+            'nombre'     => pathinfo($cvFile->getClientOriginalName(), PATHINFO_FILENAME),
+            'email'      => 'pendiente@correo.com',
+            'celular'    => '0000000000',
+            'cv'         => $path,
+            'cv_text'    => $text,
+            'vacante_id' => $vacante->id,
+            'estado'     => $evaluacion['estado'] ?? 'pendiente',
+            'razon_ia'   => $evaluacion['razon'] ?? 'Sin respuesta IA',
+            'puntaje'    => $evaluacion['puntaje'] ?? 0,
+        ]);
+    }
+
+    return redirect()
+        ->route('panel.candidatos')
+        ->with('success', 'Hojas de vida cargadas correctamente.');
+}
+
+public function subirAllCv()
+{
+    $vacantes = \App\Models\Vacante::all();
+    return view('candidatos.subirAllCv', compact('vacantes'));
+}
+
+
+
 }
