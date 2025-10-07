@@ -1,4 +1,4 @@
-@extends('layouts.usuarios') {{-- Asume que tienes un layout base llamado "app.blade.php" --}}
+@extends('layouts.usuarios')
 @section('content')
 
 
@@ -26,7 +26,7 @@
       {{-- Usamos el usuario autenticado --}}
       <img
         src="{{ asset($usuario->foto) }}"
-        alt="{{ $usuario->name }} {{$usuario->apellido }}"
+        alt="{{ $usuario->name }} "
       >
       <h2>{{ $usuario->name }} {{$usuario->apellido }}</h2>
       <p>{{ $usuario->email }}</p>
@@ -53,5 +53,6 @@
 
     </div>
   </main>
+</body>
 @endsection
 </html>

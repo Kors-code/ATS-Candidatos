@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,6 +6,7 @@
     <title>@yield('title', 'ATS')</title>
 <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
 <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+<link rel="icon" type="image/png" href="{{ asset('imagenes/logo4.png') }}">
 </head>
 <body>
     <div class="navbar">

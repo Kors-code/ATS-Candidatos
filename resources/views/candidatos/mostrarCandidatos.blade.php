@@ -11,13 +11,14 @@
 
     <h1>Lista de Candidatos</h1>
 
-    <a  class="btn-nuevo"  href="{{ route('vacantes.index') }}">➕ Nuevo Candidato</a>
-    <a  class="btn-nuevo"  href="{{ route('subirAllCv') }}">🧙‍♀️​​ Store Masivo</a>
+    <a  class="btn-nuevo" href="{{ route('vacantes.index') }}">➕ Nuevo Candidato</a>
+    <a  class="btn-nuevo"  href="{{ route('subirAllCv') }}">🧙​ Store Masivo</a>
+
 
     <ul class="vacante-lista ">
         @foreach ($vacantes as $vacante)
             <li>
-                <a class="{{$vacante->habilitado === false ? 'vacante-deshabilitada' : ''}}" href="{{ route('candidatos.show', $vacante->slug) }}">                    {{ $vacante->titulo }}
+                <a class="{{ $vacante->habilitado === false ? 'vacante-deshabilitada' : '' }}" href="{{ route('candidatos.show', $vacante->slug) }}">                    {{ $vacante->titulo }}
                 </a>
             </li>
         @endforeach

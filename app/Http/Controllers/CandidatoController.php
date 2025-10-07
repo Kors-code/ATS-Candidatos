@@ -17,6 +17,8 @@ use MailerSend\Helpers\Builder\Recipient;
 use MailerSend\Helpers\Builder\EmailParams;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CandidatosExport;
+use Illuminate\Support\Facades\Log;
+
 class CandidatoController extends Controller
 {
 
@@ -60,7 +62,7 @@ return view('candidatos.create');
             'email' => 'required|email',
             'cv' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
             'celular' => 'required',
-            
+            'autorizacion' => 'required',
         ]);
 
             if ($request->hasFile('cv')) {
@@ -125,6 +127,8 @@ if ($extension === 'pdf') {
     $text = '[Formato no soportado]';
 }
 
+Log::info("Informacion de la hoja de vida {$text} ");
+
     $data['cv_text'] = $text;
     $nombreVacante = $vacante->slug;
     $requisito_ia = $vacante->requisito_ia;
@@ -145,7 +149,7 @@ if ($extension === 'pdf') {
 
         Candidato::create($data);
 
-        return back()->with('success', 'Candidato guardado');
+        return back()->with('success', 'Hoja De Vida Enviada Con Exito');
     }
 
     
@@ -456,6 +460,7 @@ public function export(Request $request, $slug)
 
     return Excel::download(new CandidatosExport($candidatos), 'candidatos.xlsx');
 }
+
 public function storeMasivo(Request $request)
 {
     // Validamos al menos la vacante (dejamos cvs opcional aquí para manejar manualmente)
@@ -569,9 +574,8 @@ public function storeMasivo(Request $request)
         ]);
     }
 
-    return redirect()
-        ->route('panel.candidatos')
-        ->with('success', 'Hojas de vida cargadas correctamente.');
+
+        return back()->with('success', 'Hojas de vida subidas correctamente');
 }
 
 public function subirAllCv()
@@ -579,6 +583,7 @@ public function subirAllCv()
     $vacantes = \App\Models\Vacante::all();
     return view('candidatos.subirAllCv', compact('vacantes'));
 }
+
 
 
 

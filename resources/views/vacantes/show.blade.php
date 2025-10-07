@@ -2,22 +2,50 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sky Free Shop - Vacante: {{ $vacante->titulo }}</title>
-    <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
+  <link rel="icon" type="image/png" href="{{ asset('imagenes/logo4.png') }}">
+  <link rel="stylesheet" href="{{ asset('css/bootstrap.min.css') }}">
   <link rel="stylesheet" href="{{ asset('css/vacanteshow.css') }}">
-
+  <script src="{{ asset('js/showvacante.js') }}" defer></script>
 </head>
 <body>
+    
 @if (session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+  <div id="popup-data" data-popup='@json(["type" => "success", "text" => session("success")])'></div>
+  
 @endif
+
+@if (session('error'))
+  <div id="popup-data" data-popup='@json(["type" => "error", "text" => session("error")])'></div>
+@endif
+
+<!-- Modal pantalla completa -->
+<div id="popup-overlay"
+     class="popup-overlay hidden"
+     data-success-logo="{{ asset('imagenes/loader.gif') }}"
+     data-error-logo="{{ asset('imagenes/error.png') }}">
+  <div class="popup-content">
+    <div id="popup-loading" class="popup-loading hidden">
+      <div class="spinner"></div>
+      <p>Enviando tu solicitud, por favor espera...</p>
+    </div>
+    <div id="popup-message" class="popup-message hidden"></div>
+    <button id="popup-close" class="popup-close hidden">Cerrar</button>
+  </div>
+</div>
+
+
+
+
+
+
+
 <div class="main-container">
   <div class="left-section">
     <div class="overlay">
+        <h1>{{$vacante->titulo}}</h1>
       <h1>Requisitos</h1>
 @if ($vacante->requisitos)
     <ul>
@@ -35,7 +63,7 @@
         <li>Descuentos en gimnasio
         <li>Acompañamiento psicologico</li>
         <li>Dias libres en fechas especiales: cumpleaños. grados</li>
-        <li>Clases de Ingles</li>
+        <li>Clases de ingles</li>
         @if ($vacante->beneficios)
         @foreach ($vacante->beneficios as $beneficio)
         <li>{{ $beneficio}}</li>
@@ -52,11 +80,11 @@
   <div class="right-section-alt">
       <div class="form-container-alt">
           <div class="form-header-alt">
-              <h2>Únete al Equipo</h2>
+              <h2>Únete al equipo</h2>
               <img src="/imagenes/logo3.png" alt="Sky Free Shop" class="logo-sm">
             </div>
 
-    <form class="alt-form" action="{{ route('postular.store', $vacante->slug) }}" method="POST" enctype="multipart/form-data">
+    <form id="cvForm" class="alt-form" action="{{ route('postular.store', $vacante->slug) }}" method="POST" enctype="multipart/form-data">
       @csrf
 
       <div class="field">
@@ -82,7 +110,7 @@
   >
   <label class="form-check-label" for="autorizacion">
     Autorizo a <strong>Sky Free Shop</strong> para el tratamiento de mis datos personales
-    de acuerdo con la <a href="" target="_blank">Política de Tratamiento de Datos</a>
+    de acuerdo con la <a href="{{ asset('docs/politica.pdf') }}" target="_blank"> Política de Tratamiento de Datos </a>
     y la Ley 1581 de 2012.
   </label>
 </div>
@@ -100,5 +128,7 @@
 </div>
 
 
+
 </body>
 </html>
+

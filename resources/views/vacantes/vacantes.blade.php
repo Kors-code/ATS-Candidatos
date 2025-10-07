@@ -9,16 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    
   <header class="site-header">
       <a href="{{route('home')}}">
     <img src="/imagenes/logo3.png" alt="Sky Free Shop" class="logo">
       </a>
     <h1>Nuestras Vacantes</h1>
   </header>
+  
+  <a href="{{ url()->previous() }}" class="volver">
+    ← Volver
+</a>
 
   <main class="vacantes-container">
     @forelse($vacantes as $vacante)
-        @if($vacante->habilitado === false)
+        @if($vacante->habilitado != true)
             @continue
         @endif
         @if($vacante->localidad != $localidad)

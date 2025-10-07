@@ -9,6 +9,17 @@ body {
   background: #f5f1f3;
   color: #333;
 }
+    .volver{
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #840028;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 5px; 
+    text-decoration: none; 
+    font-weight: bold; transition: background 0.2s;
+        
+    }
 .site-header {
   background: #840028;
   color: #fff;

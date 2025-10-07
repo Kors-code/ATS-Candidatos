@@ -59,14 +59,7 @@
     </div>
     <div class="offcanvas-body" >
 
-        <div >
-            <h6>Cargos</h6>
-            <button class="toggle-button {{ data_get($initialToggles, 'contador', false) ? 'active' : '' }}" id="myToggleButton" >Contador</button>
-            <button class="toggle-button {{ data_get($initialToggles, 'cajero', false) ? 'active' : '' }}" id="ToggleButtoncajero" >Cajero</button>
-            <button class="toggle-button {{ data_get($initialToggles, 'ventas', false) ? 'active' : '' }}" id="ToggleButtonventas" >Ventas</button>
-            
-            <button id="aplicarFiltrosBtn" class="btn">Aplicar Filtros</button>
-        </div>
+
 <br>
         <div>
             <h6>Fecha</h6>

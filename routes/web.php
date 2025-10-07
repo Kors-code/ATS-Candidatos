@@ -12,7 +12,8 @@ use App\Http\Controllers\UserExportController;
 use App\Http\Controllers\AuthCorreoController;
 use App\Http\Controllers\TwoFactorEmailController;
 use App\Http\Controllers\PhotoController;
-
+use App\Http\Controllers\SiigoController;
+use App\Http\Controllers\ConfigController;
 
 Route::get('/', function () {
     return view('home');
@@ -33,7 +34,7 @@ Route::get('/login',   [AuthenticatedSessionController::class, 'create'])->name(
 //Guardar Candidato publico
 Route::get('postular/{vacante}', [CandidatoController::class, 'formularioPostulacion'])->name('postular');
 Route::post('postular/{slug}', [CandidatoController::class, 'store'])
-->middleware(['auth','throttle:5,1'])->name('postular.store');
+->middleware(['throttle:5,1'])->name('postular.store');
 Route::get('/vervacantes/{localidad}', [VacanteController::class, 'vervacantes'])->name('vacantes.vacantes');
 Route::post('/vacantes/{slug}/postulacion', [CandidatoController::class, 'store'])->name('vacante.postular');
 //Vista Usuarios Vacante
@@ -44,55 +45,82 @@ Route::get('/vacantes/{slug}', [VacanteController::class, 'show'])->name('vacant
 Route::get('/2fa/setup', [TwoFactorController::class, 'enable'])->name('2fa.setup');
 Route::get('/2fa/verify', [TwoFactorController::class, 'showVerifyForm'])->name('2fa.verify');
 Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify.post');
+Route::post('/2fa/setup', [TwoFactorController::class, 'setup'])->name('2fa.setup.post');
 
 // Verificación del 2FA por email en login
 
 Route::get('/2fa-email/setup', [TwoFactorEmailController::class, 'showSetupForm'])->name('2fa.email.setup');
 Route::post('/email2fa/setup', [TwoFactorEmailController::class, 'setup'])->name('email2fa.setup.post');
 Route::post('/email2fa/verify', [TwoFactorEmailController::class, 'verify'])->name('email2fa.verify.post');
+Route::get('/politica-tratamiento', [VacanteController::class,  'politica-tratamiento'])->name('politica-tratamiento');
 
 
-Route::post('/masivo/subircv', [CandidatoController::class, 'storeMasivo'])
+
+Route::middleware('auth')->group(function () {
+    
+    
+    // Carga masiva hojas de vida 
+    Route::post('/masivo/subircv', [CandidatoController::class, 'storeMasivo'])
     ->name('storeMasivo.subir');
 
     Route::get('/carga-masiva', [CandidatoController::class, 'subirAllCv'])
         ->name('subirAllCv');
-    // Usuarios
-Route::middleware('auth')->group(function () {
     
-    Route::get('/view-users', [UserController::class, 'index'])
-    ->middleware('can:admin')
-    ->name('view-users');
-    Route::get('/usuarios/crear', [UserController::class, 'create'])->middleware(['can:admin'])->name('usuarios.create');
+    
+    // Software siigo 
+    
+
+Route::get('/configs', [ConfigController::class, 'index']);
+
+
+Route::get('/siigo/upload', [SiigoController::class, 'showUploadForm'])->name('siigo.uploadForm');
+Route::post('/siigo/upload', [SiigoController::class, 'uploadExcel'])->name('siigo.uploadExcel');
+Route::post('siigo/invoice/{coll}', [SiigoController::class, 'sendInvoiceSiigo']);
+Route::post('siigo/comprobante', [SiigoController::class, 'sendComprobanteSiigo']);
+Route::post('siigo/comprobante-test', [SiigoController::class, 'sendComprobanteSiigopRUEBAS'] ?? function(){});
+Route::post('siigo/agregar', [SiigoController::class, 'agregarInfoComprobante']);
+Route::get('siigo/comprobantes', [SiigoController::class, 'getComprobantes']);
+Route::post('siigo/listado/{pg}', [SiigoController::class, 'getListadoSiigo']);
+Route::post('siigo/invoices/{pg}', [SiigoController::class, 'getFacturacionSiigo']);
+Route::post('siigo/journals/{pg}', [SiigoController::class, 'getComprobantesSiigo']);
+Route::post('siigo/pdf/{coll}', [SiigoController::class, 'PdfFactura']);
+
+// Fin software siigo
+
+    // Usuarios
+   
+    Route::get('/usuarios/crear', [UserController::class, 'create'])
+    ->middleware(['auth', 'ensure.role:admin'])
+    ->name('usuarios.create');
     
     Route::post('users', [UserController::class, 'store'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('users.store');
 
     Route::get('/view-users', [UserController::class, 'index'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('view-users');
 
+
     Route::get('/users/{user}/ver_user', [UserController::class, 'verusuario'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('ver_user');
     
     Route::get('/users/ver_perfil', [UserController::class, 'verperfil'])
-    ->middleware('can:admin')
     ->name('ver_perfil');
 
     Route::get('users', [UserController::class, 'index'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('users.index');
 
 
 
     Route::get('/users/export', [UserExportController::class, 'export'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('users.export');
 
     Route::delete('/users/{user}', [UserController::class, 'destroy'])
-    ->middleware('can:admin')
+    ->middleware(['auth', 'ensure.role:admin'])
     ->name('users.destroy');
 
 
@@ -139,10 +167,4 @@ Route::get('/candidatos/{slug}/export', [CandidatoController::class, 'export'])-
         Route::get('/enviar-email', [UserController::class, 'enviarVerificacion'])->name('enviarVerificacion');
 
         // Enviar email de verificación
-
-        //store masivo
-        // Mostrar formulario de carga masiva
-
-// Procesar carga masiva (recibe el slug de la vacante)
-
 });

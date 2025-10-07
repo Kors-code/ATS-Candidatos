@@ -7,6 +7,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnAgregarBeneficio = document.getElementById('btn-agregarbeneficio')
     const contenedorBeneficios = document.getElementById('contenedor-beneficios')
     const btnQuitarBeneficio = document.getElementById('btn-quitarbeneficio')
+    const btn = document.getElementById('mostrarRecomendaciones');
+    const box = document.getElementById('recomendacionesIA');
+
+            box.style.display = 'none';
 
     btnAgregarBeneficio.addEventListener('click', function (){
         contadorbeneficios++;
@@ -40,4 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
         contenedor.appendChild(nuevoCampo);
     });
+    btn.addEventListener('click', () => {
+
+            const visible = box.style.display === 'block';
+            box.style.display = visible ? 'none' : 'block';
+            btn.textContent = visible ? '📋 Ver recomendaciones' : '🔽 Ocultar recomendaciones';
+        });
 });

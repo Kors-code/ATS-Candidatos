@@ -71,6 +71,10 @@ class VacanteController extends Controller
     public function show($slug)
     {
         $vacante = Vacante::where('slug', $slug)->firstOrFail();
+        if ($vacante->habilitado == 0) {
+        // opción 1: mostrar una vista de error personalizada
+        return response()->view('errors.vacanteDesabilitada', [], 403);
+        }
         return view('vacantes.show', compact('vacante'));
     }
     public function edit($slug)

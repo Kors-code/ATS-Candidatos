@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('content')
@@ -65,11 +66,11 @@
                 </form>
             </td>
             <td>
-                @if($vacante->habilitado === false)
-                <p>Deshabilitado</p>
-                @else
-                <p>Habilitada</p>
+                @if ($vacante->habilitado == true)
                 
+                    <p>habilitado</p>
+                @else
+                    <p>Deshabilitado</p>
                 @endif
             </td>
 

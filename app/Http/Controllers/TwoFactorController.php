@@ -43,6 +43,23 @@ class TwoFactorController extends Controller
         return view('auth.2fa-verify');
     }
     
+    public function Setup(Request $request)
+    {
+        $user = Auth::user();
+        $request->validate(['code' => 'required']);
+        
+        // ✅ Recrear TOTP desde el secret almacenado
+        $totp = TOTP::createFromSecret($user->google2fa_secret);
+        
+        if ($totp->verify($request->code)) {
+            $user->fav_2fa = "google_authenticator";
+            $user->save();
+            $request->session()->forget('2fa:user:id');
+            return redirect()->route('vacantes.inicio')->with('success', 'Verificación creada con éxito ✅');
+        }
+        
+        return back()->withErrors(['code' => 'Código inválido']);
+    }
     public function verify(Request $request)
     {
         $request->validate(['code' => 'required']);
@@ -54,7 +71,6 @@ class TwoFactorController extends Controller
         $totp = TOTP::createFromSecret($user->google2fa_secret);
         
         if ($totp->verify($request->code)) {
-            $user->fav_2fa = "google_authenticator";
             Auth::login($user);
             $request->session()->forget('2fa:user:id');
             return redirect()->intended(route('vacantes.inicio'));
